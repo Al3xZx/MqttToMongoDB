@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:6.0.11
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: passw0rd!
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0.18
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - mosquitto-init:/mosquitto/initialization
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-config:/mosquitto/config
+      - mosquitto-log:/mosquitto/log
+    command: >
+      sh -c "if [ ! -f /mosquitto/initialization/initialized ]; then \
+                  echo 'allow_anonymous false' >> /mosquitto/config/mosquitto.conf && \
+                  if [ ! -f /mosquitto/config/mosquitto.passwd ]; then \
+                        touch /mosquitto/config/mosquitto.passwd && \
+                        mosquitto_passwd -b /mosquitto/config/mosquitto.passwd mqttuser mqttpsw; \
+                  fi && \
+                  echo 'password_file /mosquitto/config/mosquitto.passwd' >> /mosquitto/config/mosquitto.conf && \
+                  echo 'listener 1883' >> /mosquitto/config/mosquitto.conf && \
+                  touch /mosquitto/initialization/initialized; \
+            fi && \
+            mosquitto -c /mosquitto/config/mosquitto.conf"
+    restart: always
+
+volumes:
+  mongodb_data:
+  mosquitto-init:
+  mosquitto-data:
+  mosquitto-config:
+  mosquitto-log:
