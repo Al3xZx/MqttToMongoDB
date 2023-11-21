@@ -43,6 +43,10 @@ To test the application, follow these steps:
 
    Publish messages to this topic to observe the application's behavior.
 
+Feel free to explore the application's source code and configurations for further customization.
+
+Happy coding! 🚀
+
 ## Cleanup
 
 To stop and remove the Docker containers, use the following command:
@@ -50,10 +54,6 @@ To stop and remove the Docker containers, use the following command:
 ```bash
 docker-compose down
 ```
-
-Feel free to explore the application's source code and configurations for further customization.
-
-Happy coding! 🚀
 
 ## Environment Variables
 
