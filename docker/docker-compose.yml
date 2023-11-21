@@ -12,6 +12,8 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - test-net
 
   mosquitto:
     image: eclipse-mosquitto:2.0.18
@@ -37,6 +39,30 @@ services:
             fi && \
             mosquitto -c /mosquitto/config/mosquitto.conf"
     restart: always
+    networks:
+      - test-net
+
+  mqtt-to-mongo-db:
+    build:
+      context: ../
+    image: mqtt-to-mongo-db:latest
+    container_name: mqtt-to-mongo-db
+    restart: always
+    networks:
+      - test-net
+    environment:
+      - MONGO_DB_USERNAME=${MONGO_DB_USERNAME}
+      - MONGO_DB_PASSWORD=${MONGO_DB_PASSWORD}
+      - MONGO_DB_HOST=mongodb
+      - MONGO_DB_PORT=${MONGO_DB_PORT}
+      - MONGO_DB_DATABASE=${MONGO_DB_DATABASE}
+      - MONGO_DB_COLLECTION=${MONGO_DB_COLLECTION}
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=${MQTT_PORT}
+      - MQTT_CLIENT_NAME=${MQTT_CLIENT_NAME}
+      - MQTT_TOPIC=${MQTT_TOPIC}
 
 volumes:
   mongodb_data:
@@ -44,3 +70,7 @@ volumes:
   mosquitto-data:
   mosquitto-config:
   mosquitto-log:
+
+networks:
+  test-net:
+    driver: bridge
