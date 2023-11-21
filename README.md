@@ -85,4 +85,45 @@ Docker Compose, you can customize these variables in the `docker-compose.yml` fi
 
 Feel free to modify these variables according to your specific environment and requirements.
 
+## MQTT Shared Subscriptions and Wildcards
 
+The MqttToMongoDB Connector utilizes features in MQTT related to Shared Subscriptions and topic wildcards. Understanding
+these concepts is crucial for configuring the connector to work effectively with your MQTT broker.
+
+### Shared Subscriptions - `$share/group`
+
+MQTT Shared Subscriptions allow multiple clients to share the same subscription and collectively receive messages sent
+to that subscription. In the configuration, you'll notice the use of `$share/group` in the `MQTT_TOPIC` variable.
+
+Here's how it works:
+
+- **`$share`:** This is a special topic level used for Shared Subscriptions.
+
+- **`group`:** This represents the Shared Subscription group name. Multiple clients subscribing to the same topic with
+  the same group name form a group that collectively receives messages sent to that topic.
+
+Here are the advantages:
+
+- **Load Distribution:** Shared Subscriptions enable the distribution of message processing load among multiple
+  instances of the MqttToMongoDB Connector. This is particularly beneficial when you have multiple instances running,
+  and you want to distribute the load evenly.
+
+- **High Availability:** In the case of one instance going offline, the other instances in the Shared Subscription group
+  can continue processing messages. This enhances the availability and fault tolerance of your MqttToMongoDB connector.
+
+- **Scalability:** As your application grows, you can scale horizontally by adding more instances of the MqttToMongoDB
+  Connector. Shared Subscriptions allow these instances to work together seamlessly without duplication of messages.
+
+### Multi-level Wildcard - `#`
+
+The `#` symbol in MQTT is a multi-level wildcard that represents multiple levels in the topic hierarchy.
+In the configuration, `#` is used to subscribe to all subtopics under the Shared Subscription group.
+
+### Example:
+
+Suppose you have a topic `test/data`, and multiple clients need to collectively process messages sent to this topic.
+Instead of each client subscribing to `test/data`, they can use Shared Subscriptions:
+
+```markdown
+MQTT_TOPIC: $share/group/test/# 
+```
